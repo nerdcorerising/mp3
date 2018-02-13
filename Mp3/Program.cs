@@ -4,6 +4,10 @@ using System.Linq;
 using System.IO;
 using System.Diagnostics;
 
+// TODO: actually parse the ID3 tag, not just skip it
+// TODO: figure out what to do with the data so I can skip silences
+// TODO: ability to delete frames, splice back together 
+
 namespace Mp3
 {
     class Program
@@ -18,8 +22,8 @@ namespace Mp3
 
             string filePath = args[0];
 
-            try
-            {
+            //try
+            //{
                 using (Stream input = new FileStream(filePath, FileMode.Open))
                 {
                     Stopwatch sw = new Stopwatch();
@@ -35,12 +39,16 @@ namespace Mp3
 
                     sw.Stop();
                     Console.WriteLine($"read {count} frames in {sw.ElapsedMilliseconds} milliseconds");
+                    // 26 milliseconds per frame
+                    long millis = 26 * count;
+                    TimeSpan elapsed = TimeSpan.FromMilliseconds(millis);
+                    Console.WriteLine($"file is {Math.Floor(elapsed.TotalMinutes)}:{elapsed.Seconds} long");
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Error {e.Message} at {e.StackTrace}");
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    Console.WriteLine($"Error {e.Message} at {e.StackTrace}");
+            //}
         }
     }
 }

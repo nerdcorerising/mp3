@@ -63,7 +63,7 @@ namespace Mp3
                     case 0b0110:
                         return 80000;
                     case 0b0111:
-                        return 9000;
+                        return 96000;
                     case 0b1000:
                         return 112000;
                     case 0b1001:
