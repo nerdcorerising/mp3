@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Mp3": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:\\Users\\dave\\Desktop\\Doom Theme 8 bit version.mp3\""
+    }
+  }
+}
