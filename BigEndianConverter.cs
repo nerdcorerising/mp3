@@ -22,7 +22,6 @@ namespace Mp3
         internal static uint ToUInt32(byte[] buffer, int pos)
         {
             CheckLength<uint>(buffer, pos);
-
             return (uint)((buffer[pos] << 24) | (buffer[pos + 1] << 16) | (buffer[pos + 2] << 8) | (buffer[pos + 3]));
         }
 
