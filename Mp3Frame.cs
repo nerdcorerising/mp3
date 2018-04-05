@@ -1,4 +1,6 @@
-﻿namespace Mp3
+﻿using System;
+
+namespace Mp3
 {
     public class Mp3Frame
     {
