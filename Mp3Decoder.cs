@@ -108,7 +108,7 @@ namespace Mp3
                 if ((_currentBufferPos + count) > _currentBufferSize)
                 {
                     // TODO: make this a better exception type and message
-                    throw new Exception("Tried to read past end of file");
+                    throw new Exception($"Tried to read {count} bytes but only {_currentBufferSize - _currentBufferPos} bytes are available.");
                 }
             }
         }
@@ -163,7 +163,15 @@ namespace Mp3
         {
             Mp3FrameHeader header = ParseHeader();
 
-            Mp3FrameData data = ParseData(header);
+            Mp3FrameData data = null;
+            if(header.Valid)
+            {
+                data = ParseData(header);
+            }
+            else
+            {
+                _done = true;
+            }
 
             return new Mp3Frame(header, data);
         }

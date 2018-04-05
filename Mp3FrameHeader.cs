@@ -22,11 +22,6 @@ namespace Mp3
         public Mp3FrameHeader(uint headerRaw)
         {
             _syncWord = (headerRaw & 0xFFF00000) >> 0x14;
-            if (_syncWord != 0xFFF)
-            {
-                throw new InvalidOperationException("Invalid mp3 file detected");
-            }
-
             _version = (headerRaw & 0x00080000) >> 0x13;
             _layer = (headerRaw & 0x00060000) >> 0x11;
             _errorProtection = (headerRaw & 0x00010000) >> 0x10;
@@ -41,6 +36,13 @@ namespace Mp3
             _emphasis = (headerRaw & 0x00000003);
         }
 
+        public bool Valid
+        {
+            get
+            {
+                return _syncWord == 0xFFF;
+            }
+        }
 
         public int BitRate
         {
