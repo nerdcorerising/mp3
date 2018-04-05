@@ -3,42 +3,51 @@ using System.Runtime.InteropServices;
 
 namespace Mp3
 {
-    internal class BigEndianConverter
+    public class BigEndianConverter
     {
-        internal static int ToInt32(byte[] buffer, int pos)
+        public static int ToInt32(byte[] buffer, int pos)
         {
-            CheckLength<int>(buffer, pos);
-
-            return (buffer[pos] << 24) | (buffer[pos + 1] << 16) | (buffer[pos + 2] << 8) | (buffer[pos + 3]);
+            return ConvertBytes<int>(buffer, pos);
         }
 
-        internal static ushort ToUInt16(byte[] buffer, int pos)
+        public static ushort ToUInt16(byte[] buffer, int pos)
         {
-            CheckLength<short>(buffer, pos);
-
-            return (ushort)((buffer[pos] << 8) | (buffer[pos + 1]));
+            return ConvertBytes<ushort>(buffer, pos);
         }
 
-        internal static uint ToUInt32(byte[] buffer, int pos)
+        public static uint ToUInt32(byte[] buffer, int pos)
         {
-            CheckLength<uint>(buffer, pos);
-            return (uint)((buffer[pos] << 24) | (buffer[pos + 1] << 16) | (buffer[pos + 2] << 8) | (buffer[pos + 3]));
+            return ConvertBytes<uint>(buffer, pos);
         }
 
-        internal static ulong ToUInt64(byte[] buffer, int pos)
+        public static ulong ToUInt64(byte[] buffer, int pos)
         {
-            CheckLength<ulong>(buffer, pos);
-
-            return (ulong)(((long)buffer[pos] << 56) | ((long)buffer[pos + 1] << 48) | ((long)buffer[pos + 2] << 40) | ((long)buffer[pos + 3] << 32)
-                 | ((long)buffer[pos + 4] << 24) | ((long)buffer[pos + 5] << 16) | ((long)buffer[pos + 6] << 8) | ((long)buffer[pos + 7]));
+            return ConvertBytes<ulong>(buffer, pos);
         }
 
-        private static void CheckLength<T>(byte[] buffer, int pos)
+        private static T ConvertBytes<T>(byte[] buffer, int pos)
         {
             int bytesRequired = Marshal.SizeOf<T>();
-            if (pos + bytesRequired > buffer.Length)
+            CheckLength(bytesRequired, buffer, pos, typeof(T));
+
+            long current = 0;
+            int i = 0;
+            while (bytesRequired >= 0)
             {
-                throw new ArgumentException($"Insufficient buffer for type {typeof(T)}.");
+                bytesRequired -= 1;
+                int bitShift = bytesRequired * 8;
+                current |= (long)buffer[i] << bitShift;
+                ++i;
+            }
+
+            return (T)Convert.ChangeType(current, typeof(T));
+        }
+
+        private static void CheckLength(int requiredBytes, byte[] buffer, int pos, Type t)
+        {
+            if (pos + requiredBytes > buffer.Length)
+            {
+                throw new ArgumentException($"Insufficient buffer for type {t}.");
             }
         }
     }

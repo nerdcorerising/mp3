@@ -22,8 +22,8 @@ namespace Mp3
 
             string filePath = args[0];
 
-            //try
-            //{
+            try
+            {
                 using (Stream input = new FileStream(filePath, FileMode.Open))
                 {
                     Stopwatch sw = new Stopwatch();
@@ -44,11 +44,12 @@ namespace Mp3
                     TimeSpan elapsed = TimeSpan.FromMilliseconds(millis);
                     Console.WriteLine($"file is {Math.Floor(elapsed.TotalMinutes)}:{elapsed.Seconds} long");
                 }
-            //}
-            //catch (Exception e)
-            //{
-            //    Console.WriteLine($"Error {e.Message} at {e.StackTrace}");
-            //}
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error {e.Message}");
+                Console.WriteLine($"{e.StackTrace}");
+            }
         }
     }
 }
