@@ -12,7 +12,6 @@ namespace Mp3
         private byte[] _buffer = new byte[4096];
         private int _currentBufferPos = 0;
         private int _currentBufferSize = 0;
-        private int _totalBytesRead = 0;
         private byte[] _conversionBuffer = new byte[128];
 
         public Mp3Decoder(Stream input)
@@ -126,7 +125,6 @@ namespace Mp3
             _currentBufferPos = 0;
 
             int bytesRead =_input.Read(_buffer, bytesLeft, bytesToRead);
-            _totalBytesRead += bytesRead;
             _currentBufferSize = bytesRead + bytesLeft;
 
             if (bytesRead == 0)
