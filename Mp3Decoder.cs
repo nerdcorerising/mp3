@@ -9,7 +9,7 @@ namespace Mp3
     {
         private bool _done = false;
         private Stream _input = null;
-        private byte[] _buffer = new byte[4096];
+        private byte[] _buffer;
         private int _currentBufferPos = 0;
         private int _currentBufferSize = 0;
         private byte[] _conversionBuffer = new byte[128];
@@ -17,6 +17,7 @@ namespace Mp3
         public Mp3Decoder(Stream input)
         {
             _input = input;
+            LoadBuffer();
 
             if (HasID3Tag())
             {
@@ -28,7 +29,13 @@ namespace Mp3
         {
             while (!EndOfInput())
             {
-                yield return ParseFrame();
+                Mp3Frame frame = ParseFrame();
+                if (frame == null)
+                {
+                    break;
+                }
+
+                yield return frame;
             }
         }
 
@@ -76,10 +83,7 @@ namespace Mp3
 
             EnsureBytesAvailable(count);
 
-            for (int i = 0; i < count; ++i)
-            {
-                outBuffer[i] = _buffer[_currentBufferPos + i];
-            }
+            Buffer.BlockCopy(_buffer, _currentBufferPos, outBuffer, 0, count);
         }
 
         private void ReadBytes(byte[] outBuffer, int count)
@@ -91,46 +95,25 @@ namespace Mp3
 
             EnsureBytesAvailable(count);
             
-            for(int i = 0; i < count; ++i)
-            {
-                outBuffer[i] = _buffer[_currentBufferPos];
-                _currentBufferPos++;
-            }
+            Buffer.BlockCopy(_buffer, _currentBufferPos, outBuffer, 0, count);
+            _currentBufferPos += count;
         }
 
         private void EnsureBytesAvailable(int count)
         {
             if ((_currentBufferPos + count) > _currentBufferSize)
             {
-                RefillBuffer();
-
-                if ((_currentBufferPos + count) > _currentBufferSize)
-                {
-                    // TODO: make this a better exception type and message
-                    throw new Exception($"Tried to read {count} bytes but only {_currentBufferSize - _currentBufferPos} bytes are available.");
-                }
+                // TODO: make this a better exception type and message
+                throw new Exception($"Tried to read {count} bytes but only {_currentBufferSize - _currentBufferPos} bytes are available.");
             }
         }
 
-        private void RefillBuffer()
+        private void LoadBuffer()
         {
-            int bytesLeft = _currentBufferSize - _currentBufferPos;
-            int bytesToRead = _buffer.Length - bytesLeft;
-
-            for(int i = 0; i < bytesLeft; ++i)
-            {
-                _buffer[i] = _buffer[_currentBufferPos + i];
-            }
-
+            _currentBufferSize = (int)_input.Length;
             _currentBufferPos = 0;
-
-            int bytesRead =_input.Read(_buffer, bytesLeft, bytesToRead);
-            _currentBufferSize = bytesRead + bytesLeft;
-
-            if (bytesRead == 0)
-            {
-                _done = true;
-            }
+            _buffer = new byte[_currentBufferSize];
+            _input.Read(_buffer, 0, _currentBufferSize);
         }
 
         private byte ReadNextByte()
@@ -168,7 +151,7 @@ namespace Mp3
             }
             else
             {
-                _done = true;
+                return null;
             }
 
             return new Mp3Frame(header, data);
@@ -194,12 +177,7 @@ namespace Mp3
 
         private bool EndOfInput()
         {
-            if (_currentBufferPos == _currentBufferSize)
-            {
-                RefillBuffer();
-            }
-
-            return _done && _currentBufferPos >= _currentBufferSize;
+            return _currentBufferPos >= _currentBufferSize;
         }
     }
 }
